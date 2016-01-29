@@ -1,0 +1,18 @@
+#!/bin/bash
+glineno=0
+gline=$(cat -n /usr/googleip|wc -l)
+echo -e "\c" > /usr/gglivedip
+while (( $glineno < $gline ));
+do
+        (( glineno++ ))
+        echo -e "No.$glineno Google IP \c"
+        ary_gipaddr[$glineno]=$(sed -n "$glineno"p /usr/googleip)
+        echo -e "${ary_gipaddr[$glineno]} \c"
+        gpcnt=1
+        ary_gdelytme[$glineno]=$(ping ${ary_gipaddr[$glineno]} -c $gpcnt -W 1|awk -v cnt=$gpcnt 'BEGIN{FS=" (time=)?"}/^64 bytes/{sum+=$(NF-1)}END{print sum/cnt}')
+        if [ $(echo "${ary_gdelytme[$glineno]}>0"|bc) -eq 1 ];
+        then
+                echo ${ary_gipaddr[$glineno]} >> /usr/gglivedip
+        fi
+        echo Avg. Delay Time is "${ary_gdelytme[$glineno]}"ms
+done
