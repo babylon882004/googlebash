@@ -1,0 +1,24 @@
+#!/bin/bash
+gcount=0
+gfailure=0
+glilineno=0
+gliline=$(cat -n /usr/gglivedip|wc -l)
+rm -r /usr/ggavip1
+while (( $glilineno < $gliline ));
+do
+        (( glilineno++ ))
+        gip=$(sed -n "$glilineno"p /usr/gglivedip1)
+        curl --connect-timeout 1 -I http://$gip 2>/dev/null | head -1 | grep -q " 301 Moved"
+	if [ $? -eq 0 ]; then
+		gipLocation=$(curl --connect-timeout 1 -I http://$gip 2>/dev/null|grep Location|awk '{print $2}')
+		gLocation=$(sed -n 1p /usr/ipid)
+		if [ "$gipLocation" = "$gLocation" ]; then
+			echo $gip >> /usr/ggavip1
+			echo -e "$gip \c"
+			echo 'Aviliable!'
+		fi
+	else
+		echo -e "$gip \c"
+		echo 'Unaviliable!'
+	fi
+done
